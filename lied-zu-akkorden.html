@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Lied → Akkorde</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FBF7F0;
+  --bg2:#F3EDE2;
+  --card:#FFFFFF;
+  --ink:#1C1409;
+  --ink2:#5C4F3A;
+  --ink3:#9B8E7A;
+  --coral:#C85A3A;
+  --coral-light:#F5E8E3;
+  --coral-mid:#E8A48A;
+  --green:#2D7A4F;
+  --green-light:#E3F2EB;
+  --amber:#B87A10;
+  --amber-light:#FDF3DC;
+  --border:#E5DDD0;
+  --shadow:0 2px 12px rgba(28,20,9,0.08);
+  --font-display:'Lora',serif;
+  --font-body:'Inter',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
+body{display:flex;flex-direction:column;min-height:100vh;padding:0;overflow-x:hidden;}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;align-items:center;min-height:100vh;padding:2rem 1.25rem 3rem;}
+.screen.active{display:flex;}
+
+/* ── SCREEN 1: HOME ── */
+.home-top{text-align:center;margin-bottom:2.5rem;padding-top:1.5rem;}
+.home-top h1{font-family:var(--font-display);font-size:2rem;color:var(--ink);line-height:1.2;margin-bottom:0.5rem;}
+.home-top p{font-size:0.9rem;color:var(--ink2);line-height:1.6;}
+.steps-list{width:100%;max-width:420px;margin-bottom:2.5rem;}
+.step{display:flex;align-items:flex-start;gap:1rem;padding:0.9rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:0.6rem;box-shadow:var(--shadow);}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--coral);color:#fff;font-size:0.85rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-text strong{display:block;font-size:0.9rem;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.step-text span{font-size:0.78rem;color:var(--ink3);}
+.record-btn{width:160px;height:160px;border-radius:50%;border:none;background:var(--coral);color:#fff;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.4rem;box-shadow:0 8px 32px rgba(200,90,58,0.35);transition:transform 0.15s,box-shadow 0.15s;-webkit-tap-highlight-color:transparent;}
+.record-btn:active{transform:scale(0.95);box-shadow:0 4px 16px rgba(200,90,58,0.3);}
+.record-btn svg{width:48px;height:48px;}
+.record-btn span{font-size:0.85rem;letter-spacing:0.04em;}
+.tip-note{margin-top:2rem;font-size:0.75rem;color:var(--ink3);text-align:center;max-width:280px;line-height:1.6;}
+
+/* ── SCREEN 2: RECORDING ── */
+.rec-header{text-align:center;padding-top:2rem;margin-bottom:1.5rem;}
+.rec-header h2{font-family:var(--font-display);font-size:1.6rem;color:var(--ink);margin-bottom:0.35rem;}
+.rec-header p{font-size:0.85rem;color:var(--ink2);}
+.recording-indicator{display:flex;align-items:center;gap:0.5rem;background:var(--coral-light);border:1px solid var(--coral-mid);border-radius:30px;padding:0.5rem 1.2rem;margin-bottom:1.5rem;}
+.rec-dot{width:10px;height:10px;border-radius:50%;background:var(--coral);animation:blink 1s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.rec-label{font-size:0.8rem;font-weight:600;color:var(--coral);}
+.rec-time{font-size:0.8rem;color:var(--ink2);margin-left:auto;}
+canvas#wave{width:100%;max-width:420px;height:80px;border-radius:12px;background:var(--bg2);display:block;margin-bottom:1.5rem;}
+.note-live{text-align:center;margin-bottom:2rem;}
+.note-live-label{font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:0.4rem;}
+.note-live-name{font-family:var(--font-display);font-size:4rem;color:var(--coral);line-height:1;min-height:4.5rem;transition:all 0.1s;}
+.note-live-freq{font-size:0.75rem;color:var(--ink3);margin-top:0.25rem;}
+.collected-notes{width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:2rem;box-shadow:var(--shadow);}
+.collected-label{font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:0.5rem;}
+.notes-flow{display:flex;flex-wrap:wrap;gap:4px;min-height:24px;}
+.note-chip{font-size:0.72rem;padding:3px 9px;border-radius:20px;background:var(--bg2);color:var(--ink2);border:1px solid var(--border);}
+.note-chip.new{background:var(--coral-light);color:var(--coral);border-color:var(--coral-mid);}
+.stop-btn{width:80px;height:80px;border-radius:50%;border:3px solid var(--coral);background:#fff;color:var(--coral);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);-webkit-tap-highlight-color:transparent;transition:transform 0.15s;}
+.stop-btn:active{transform:scale(0.93);}
+.stop-btn svg{width:28px;height:28px;}
+
+/* ── SCREEN 3: RESULTS ── */
+.results-header{text-align:center;padding-top:1.5rem;margin-bottom:1.5rem;width:100%;max-width:440px;}
+.results-header h2{font-family:var(--font-display);font-size:1.7rem;color:var(--ink);margin-bottom:0.35rem;}
+.results-header p{font-size:0.82rem;color:var(--ink2);line-height:1.5;}
+.result-section{width:100%;max-width:440px;margin-bottom:1.25rem;}
+.section-title{font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:0.75rem;padding-left:2px;}
+/* CHORD PROGRESSION */
+.chord-timeline{display:flex;flex-direction:column;gap:0.6rem;}
+.chord-row{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;box-shadow:var(--shadow);display:flex;align-items:center;gap:1rem;}
+.chord-row.top-chord{border-color:var(--coral);background:var(--coral-light);}
+.chord-time-badge{font-size:0.62rem;color:var(--ink3);min-width:40px;text-align:center;background:var(--bg2);border-radius:8px;padding:3px 6px;border:1px solid var(--border);flex-shrink:0;}
+.chord-row.top-chord .chord-time-badge{background:rgba(200,90,58,0.1);border-color:var(--coral-mid);color:var(--coral);}
+.chord-main{flex:1;}
+.chord-big-name{font-family:var(--font-display);font-size:1.6rem;color:var(--ink);line-height:1;}
+.chord-row.top-chord .chord-big-name{color:var(--coral);}
+.chord-sub{font-size:0.72rem;color:var(--ink3);margin-top:3px;}
+.chord-notes-row{display:flex;gap:4px;margin-top:0.4rem;flex-wrap:wrap;}
+.chord-note-tag{font-size:0.62rem;padding:2px 7px;border-radius:10px;background:var(--bg2);color:var(--ink3);border:1px solid var(--border);}
+.chord-note-tag.heard{background:var(--coral-light);color:var(--coral);border-color:var(--coral-mid);}
+.chord-confidence{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.conf-dots{display:flex;gap:3px;}
+.conf-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+.conf-dot.on{background:var(--coral);}
+.conf-pct{font-size:0.65rem;color:var(--ink3);}
+/* ALL NOTES */
+.notes-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.note-result-chip{padding:6px 14px;border-radius:20px;font-size:0.8rem;font-weight:500;border:1px solid var(--border);background:var(--card);color:var(--ink2);}
+.note-result-chip.dominant{background:var(--amber-light);color:var(--amber);border-color:#E0C060;font-weight:600;}
+/* KEY SUGGESTION */
+.key-card{background:var(--green-light);border:1px solid #A8D8BA;border-radius:14px;padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem;}
+.key-icon{width:44px;height:44px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.key-icon svg{width:22px;height:22px;stroke:#fff;}
+.key-text strong{display:block;font-size:1rem;font-weight:600;color:var(--green);}
+.key-text span{font-size:0.78rem;color:#3A6B50;}
+/* ACTION BUTTONS */
+.action-row{display:flex;gap:0.75rem;width:100%;max-width:440px;margin-top:0.5rem;}
+.btn-new{flex:1;padding:0.9rem;border-radius:12px;border:2px solid var(--coral);background:var(--coral);color:#fff;font-family:var(--font-body);font-size:0.9rem;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity 0.15s;}
+.btn-new:active{opacity:0.85;}
+.btn-copy{flex:1;padding:0.9rem;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--ink);font-family:var(--font-body);font-size:0.9rem;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+.btn-copy:active{background:var(--bg2);}
+
+/* ANALYZING OVERLAY */
+.analyzing{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center;gap:1rem;}
+.analyzing.active{display:flex;}
+.spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--coral);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.analyzing p{font-size:0.9rem;color:var(--ink2);}
+
+/* ERROR */
+.error-box{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:1rem 1.2rem;color:#991B1B;font-size:0.82rem;text-align:center;max-width:380px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ SCREEN 1: HOME ═══════════════════ -->
+<div class="screen active" id="screen-home">
+  <div class="home-top">
+    <h1>🎵 Lied zu Akkorden</h1>
+    <p>Sing oder summ dein Lied — die App erkennt<br>automatisch die passenden Akkorde.</p>
+  </div>
+
+  <div class="steps-list">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text"><strong>Aufnahme starten</strong><span>Tippe auf den roten Knopf unten</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text"><strong>Dein Lied singen</strong><span>Sing die Melodie von Anfang bis Ende — so laut und langsam du möchtest</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text"><strong>Aufnahme stoppen</strong><span>Tippe auf Stopp — die App analysiert automatisch</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text"><strong>Ergebnis ansehen</strong><span>Akkorde und Noten erscheinen sofort auf dem Bildschirm</span></div>
+    </div>
+  </div>
+
+  <button class="record-btn" onclick="startRecording()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="9" y="2" width="6" height="13" rx="3" fill="white" stroke="white"/>
+      <path d="M5 10a7 7 0 0014 0M12 19v3M9 22h6" stroke="white"/>
+    </svg>
+    <span>Aufnahme starten</span>
+  </button>
+
+  <p class="tip-note">💡 Tipp: Du brauchst keine Musikkennnisse. Einfach singen oder summen — auch falsch singen ist okay!</p>
+
+  <div id="home-error" style="margin-top:1.5rem;"></div>
+</div>
+
+<!-- ═══════════════════ SCREEN 2: RECORDING ═══════════════════ -->
+<div class="screen" id="screen-rec">
+  <div class="rec-header">
+    <h2>Singe dein Lied</h2>
+    <p>Sing von Anfang bis Ende — dann drücke Stopp</p>
+  </div>
+
+  <div class="recording-indicator">
+    <div class="rec-dot"></div>
+    <span class="rec-label">Aufnahme läuft</span>
+    <span class="rec-time" id="rec-time">0:00</span>
+  </div>
+
+  <canvas id="wave"></canvas>
+
+  <div class="note-live">
+    <div class="note-live-label">Aktuell erkannter Ton</div>
+    <div class="note-live-name" id="live-note">—</div>
+    <div class="note-live-freq" id="live-freq"></div>
+  </div>
+
+  <div class="collected-notes">
+    <div class="collected-label">Aufgezeichnete Töne</div>
+    <div class="notes-flow" id="notes-flow">
+      <span style="font-size:0.75rem;color:var(--ink3);">Sing etwas...</span>
+    </div>
+  </div>
+
+  <button class="stop-btn" onclick="stopRecording()" title="Stopp">
+    <svg viewBox="0 0 24 24" fill="var(--coral)">
+      <rect x="5" y="5" width="14" height="14" rx="2"/>
+    </svg>
+  </button>
+  <div style="font-size:0.72rem;color:var(--ink3);margin-top:0.6rem;">Tippe zum Stoppen</div>
+</div>
+
+<!-- ═══════════════════ SCREEN 3: RESULTS ═══════════════════ -->
+<div class="screen" id="screen-results">
+  <div class="results-header">
+    <h2>🎼 Dein Lied-Entwurf</h2>
+    <p id="results-subtitle">Hier sind die erkannten Akkorde und Noten.</p>
+  </div>
+
+  <div class="analyzing" id="analyzing">
+    <div class="spinner"></div>
+    <p>Analysiere deine Melodie...</p>
+  </div>
+
+  <div id="results-content" style="width:100%;max-width:440px;display:none;">
+
+    <!-- KEY -->
+    <div class="result-section">
+      <div class="section-title">Wahrscheinliche Tonart</div>
+      <div class="key-card" id="key-card">
+        <div class="key-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        </div>
+        <div class="key-text">
+          <strong id="key-name">—</strong>
+          <span id="key-desc">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHORDS -->
+    <div class="result-section">
+      <div class="section-title">Akkorde — Abschnitt für Abschnitt</div>
+      <div class="chord-timeline" id="chord-timeline"></div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="result-section">
+      <div class="section-title">Alle erkannten Töne</div>
+      <div class="notes-grid" id="notes-grid"></div>
+      <p style="font-size:0.72rem;color:var(--ink3);margin-top:0.6rem;line-height:1.5;">Fettgedruckte Töne kamen am häufigsten vor.</p>
+    </div>
+
+    <!-- TEXT SUMMARY -->
+    <div class="result-section">
+      <div class="section-title">Zusammenfassung für deinen Musiker</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;box-shadow:var(--shadow);">
+        <div id="summary-text" style="font-size:0.82rem;color:var(--ink2);line-height:1.7;white-space:pre-wrap;"></div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-new" onclick="newRecording()">Neu singen</button>
+      <button class="btn-copy" onclick="copySummary()">📋 Kopieren</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─── MUSIC DATA ────────────────────────────────────────────────────────────────
+const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTE_DE=['C','Cis','D','Dis','E','F','Fis','G','Gis','A','Ais','H'];
+
+const CHORD_TYPES=[
+  {suffix:'',    de:'Dur',         intervals:[0,4,7]},
+  {suffix:'m',   de:'Moll',        intervals:[0,3,7]},
+  {suffix:'7',   de:'Dominantsept',intervals:[0,4,7,10]},
+  {suffix:'maj7',de:'Großes Sept', intervals:[0,4,7,11]},
+  {suffix:'m7',  de:'Moll-Sept',   intervals:[0,3,7,10]},
+  {suffix:'sus2',de:'Sus2',        intervals:[0,2,7]},
+  {suffix:'sus4',de:'Sus4',        intervals:[0,5,7]},
+  {suffix:'dim', de:'Vermindert',  intervals:[0,3,6]},
+];
+
+const ALL_CHORDS=[];
+for(let r=0;r<12;r++){
+  for(const t of CHORD_TYPES){
+    ALL_CHORDS.push({root:r,rootName:NOTES[r],suffix:t.suffix,de:t.de,
+      notes:t.intervals.map(i=>(r+i)%12)});
+  }
+}
+
+// Major scale patterns for key detection
+const MAJOR_SCALES=[
+  [0,2,4,5,7,9,11],[7,9,11,0,2,4,6],[2,4,6,7,9,11,1],[9,11,1,2,4,6,8],
+  [4,6,8,9,11,1,3],[11,1,3,4,6,8,10],[6,8,10,11,1,3,5],[1,3,5,6,8,10,0],
+  [8,10,0,1,3,5,7],[3,5,7,8,10,0,2],[10,0,2,3,5,7,9],[5,7,9,10,0,2,4]
+];
+const MINOR_SCALES=MAJOR_SCALES.map(s=>{const r=(s[0]+9)%12;return[r,(r+2)%12,(r+3)%12,(r+5)%12,(r+7)%12,(r+8)%12,(r+10)%12];});
+
+function detectKey(noteFreqs){
+  let bestKey='C',bestScore=0,bestMode='Dur';
+  for(let i=0;i<12;i++){
+    let majScore=0,minScore=0;
+    for(const[n,f] of noteFreqs){majScore+=(MAJOR_SCALES[i].includes(n)?f:0);}
+    for(const[n,f] of noteFreqs){minScore+=(MINOR_SCALES[i].includes(n)?f:0);}
+    if(majScore>bestScore){bestScore=majScore;bestKey=NOTES[i];bestMode='Dur';}
+    if(minScore>bestScore){bestScore=minScore;bestKey=NOTES[(i+9)%12];bestMode='Moll';}
+  }
+  return{key:bestKey,mode:bestMode};
+}
+
+// ─── PITCH DETECTION ──────────────────────────────────────────────────────────
+function detectPitch(buf,sr){
+  const N=Math.floor(buf.length/2);
+  let bestOff=-1,bestC=0,lastC=1,found=false;
+  const corrs=new Float32Array(N);
+  for(let o=0;o<N;o++){
+    let c=0;for(let i=0;i<N;i++)c+=Math.abs(buf[i]-buf[i+o]);
+    c=1-c/N;corrs[o]=c;
+    if(c>0.88&&c>lastC){found=true;if(c>bestC){bestC=c;bestOff=o;}}
+    else if(found){
+      const s=corrs[bestOff-1]||0,m=corrs[bestOff],e=corrs[bestOff+1]||0;
+      const sh=(e-s)/(2*(2*m-e-s))||0;
+      return{freq:sr/(bestOff+sh),corr:bestC};
+    }
+    lastC=c;
+  }
+  return bestOff>-1?{freq:sr/bestOff,corr:bestC}:null;
+}
+
+function freqToNoteIdx(freq){
+  if(freq<60||freq>2000)return null;
+  const st=12*Math.log2(freq/440);
+  const midi=Math.round(st)+69;
+  return{idx:((midi%12)+12)%12,midi,oct:Math.floor(midi/12)-1};
+}
+
+function rms(buf){let s=0;for(let i=0;i<buf.length;i++)s+=buf[i]*buf[i];return Math.sqrt(s/buf.length);}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let audioCtx=null,analyser=null,stream=null,rafId=null;
+let recording=false;
+let recStartTime=0,timerInterval=null;
+let capturedEvents=[]; // [{noteIdx, time}]
+let lastNoteIdx=null,lockFrames=0;
+const LOCK=5;
+
+// ─── WAVEFORM CANVAS ──────────────────────────────────────────────────────────
+const wCvs=document.getElementById('wave');
+const wCtx=wCvs.getContext('2d');
+function resizeWave(){wCvs.width=wCvs.clientWidth*devicePixelRatio;wCvs.height=wCvs.clientHeight*devicePixelRatio;wCtx.scale(devicePixelRatio,devicePixelRatio);}
+resizeWave();
+
+function drawWave(buf){
+  const w=wCvs.clientWidth,h=wCvs.clientHeight;
+  wCtx.clearRect(0,0,w,h);
+  wCtx.fillStyle='#F3EDE2';wCtx.fillRect(0,0,w,h);
+  wCtx.beginPath();wCtx.strokeStyle='#C85A3A';wCtx.lineWidth=2;
+  const step=w/buf.length;
+  for(let i=0;i<buf.length;i++){
+    const x=i*step,y=h/2+buf[i]*(h/2)*0.85;
+    i?wCtx.lineTo(x,y):wCtx.moveTo(x,y);
+  }
+  wCtx.stroke();
+}
+
+// ─── RECORDING FLOW ───────────────────────────────────────────────────────────
+async function startRecording(){
+  const errEl=document.getElementById('home-error');
+  errEl.innerHTML='';
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:44100});
+    analyser=audioCtx.createAnalyser();
+    analyser.fftSize=4096;analyser.smoothingTimeConstant=0.2;
+    const src=audioCtx.createMediaStreamSource(stream);
+    src.connect(analyser);
+    capturedEvents=[];lastNoteIdx=null;lockFrames=0;
+    recording=true;recStartTime=Date.now();
+    showScreen('screen-rec');
+    startTimer();drawLoop();
+  }catch(e){
+    errEl.innerHTML='<div class="error-box">Mikrofon-Zugriff nicht möglich.<br>Bitte erlaube den Mikrofon-Zugriff im Browser und versuche es erneut.</div>';
+  }
+}
+
+function stopRecording(){
+  recording=false;
+  if(rafId)cancelAnimationFrame(rafId);
+  clearInterval(timerInterval);
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  if(audioCtx)audioCtx.close();
+  showScreen('screen-results');
+  analyzeAndShow();
+}
+
+function newRecording(){
+  showScreen('screen-home');
+}
+
+// ─── TIMER ────────────────────────────────────────────────────────────────────
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    const s=Math.floor((Date.now()-recStartTime)/1000);
+    const m=Math.floor(s/60),sec=s%60;
+    document.getElementById('rec-time').textContent=m+':'+(sec<10?'0':'')+sec;
+  },500);
+}
+
+// ─── DRAW LOOP ────────────────────────────────────────────────────────────────
+let chipCount=0;
+function drawLoop(){
+  if(!recording)return;
+  rafId=requestAnimationFrame(drawLoop);
+  const buf=new Float32Array(analyser.fftSize);
+  analyser.getFloatTimeDomainData(buf);
+  drawWave(buf.slice(0,512));
+
+  const vol=rms(buf);
+  if(vol<0.008){lockFrames=0;document.getElementById('live-note').textContent='—';document.getElementById('live-freq').textContent='';return;}
+
+  const res=detectPitch(buf,audioCtx.sampleRate);
+  if(res&&res.corr>0.9){
+    const n=freqToNoteIdx(res.freq);
+    if(n&&n.oct>=2&&n.oct<=6){
+      if(lastNoteIdx!==n.idx){lockFrames=0;lastNoteIdx=n.idx;}
+      else lockFrames++;
+      if(lockFrames>=LOCK){
+        document.getElementById('live-note').textContent=NOTES[n.idx];
+        document.getElementById('live-freq').textContent=res.freq.toFixed(1)+' Hz';
+        capturedEvents.push({noteIdx:n.idx,time:Date.now()-recStartTime});
+        updateChips(n.idx);
+      }
+    }
+  }
+}
+
+function updateChips(idx){
+  const flow=document.getElementById('notes-flow');
+  chipCount++;
+  if(chipCount===1)flow.innerHTML='';
+  if(chipCount>80){flow.innerHTML='<span style="font-size:0.75rem;color:var(--ink3);">Viele Töne aufgezeichnet ✓</span>';return;}
+  const chip=document.createElement('span');
+  chip.className='note-chip new';chip.textContent=NOTES[idx];
+  flow.appendChild(chip);
+  setTimeout(()=>chip.classList.remove('new'),600);
+}
+
+// ─── ANALYSIS ────────────────────────────────────────────────────────────────
+function analyzeAndShow(){
+  const content=document.getElementById('results-content');
+  const analyzing=document.getElementById('analyzing');
+  content.style.display='none';analyzing.classList.add('active');
+
+  setTimeout(()=>{
+    analyzing.classList.remove('active');
+    if(capturedEvents.length<5){
+      content.style.display='block';
+      document.getElementById('results-subtitle').textContent='Zu wenige Töne erkannt. Bitte erneut versuchen.';
+      document.getElementById('chord-timeline').innerHTML='<p style="font-size:0.82rem;color:var(--ink3);">Keine Akkorde erkennbar — sing bitte länger und deutlicher.</p>';
+      document.getElementById('notes-grid').innerHTML='';
+      document.getElementById('summary-text').textContent='';
+      return;
+    }
+    content.style.display='block';
+    document.getElementById('results-subtitle').textContent='Hier sind die erkannten Akkorde und Noten deines Liedes.';
+
+    // Note frequency map
+    const noteCount={};
+    for(const e of capturedEvents){noteCount[e.noteIdx]=(noteCount[e.noteIdx]||0)+1;}
+    const noteFreqs=Object.entries(noteCount).map(([n,f])=>[parseInt(n),f]);
+    const totalNotes=capturedEvents.length;
+
+    // Key detection
+    const {key,mode}=detectKey(noteFreqs);
+    document.getElementById('key-name').textContent=key+' '+mode;
+    document.getElementById('key-desc').textContent=
+      'Dein Lied klingt wahrscheinlich in der Tonart '+key+' '+mode+
+      (mode==='Dur'?' — das klingt hell und fröhlich.':' — das klingt eher gefühlvoll und nachdenklich.');
+
+    // Segment-based chord analysis (divide recording into segments)
+    const duration=capturedEvents[capturedEvents.length-1].time;
+    const SEGS=Math.min(6,Math.max(2,Math.round(duration/3000)));
+    const segLen=duration/SEGS;
+    const chordRows=[];
+
+    for(let s=0;s<SEGS;s++){
+      const t0=s*segLen,t1=(s+1)*segLen;
+      const evts=capturedEvents.filter(e=>e.time>=t0&&e.time<t1);
+      if(evts.length<2)continue;
+      const segNoteCount={};
+      for(const e of evts)segNoteCount[e.noteIdx]=(segNoteCount[e.noteIdx]||0)+1;
+      const segNotes=new Set(evts.map(e=>e.noteIdx));
+      const maxC=Math.max(...Object.values(segNoteCount));
+      const normC=Object.fromEntries(Object.entries(segNoteCount).map(([n,c])=>[n,c/maxC]));
+
+      const scored=ALL_CHORDS.map(c=>{
+        let score=0;
+        for(const n of c.notes)score+=normC[n]||0;
+        const unmatched=c.notes.filter(n=>!segNotes.has(n)).length;
+        score-=unmatched*0.3;
+        return{...c,score:Math.max(0,score),heard:c.notes.filter(n=>segNotes.has(n))};
+      }).sort((a,b)=>b.score-a.score);
+
+      const best=scored[0];
+      const maxScore=scored[0].score||1;
+      const confPct=Math.min(100,Math.round((best.score/maxScore)*100));
+      const mm=Math.floor(t0/1000/60),ss=Math.floor((t0/1000)%60);
+      chordRows.push({chord:best,confPct,timeLabel:mm+':'+(ss<10?'0':'')+ss,isFirst:s===0,heard:best.heard,allNotes:best.notes});
+    }
+
+    // Render chord timeline
+    const timeline=document.getElementById('chord-timeline');
+    timeline.innerHTML=chordRows.map((r,i)=>{
+      const dots=[1,2,3,4,5].map(d=>`<div class="conf-dot${d<=Math.round(r.confPct/20)?' on':''}"></div>`).join('');
+      const notePills=r.allNotes.map(n=>`<span class="chord-note-tag${r.heard.includes(n)?' heard':''}">${NOTES[n]}</span>`).join('');
+      return`<div class="chord-row${i===0?' top-chord':''}">
+        <div class="chord-time-badge">${r.timeLabel}</div>
+        <div class="chord-main">
+          <div class="chord-big-name">${r.chord.rootName}${r.chord.suffix}</div>
+          <div class="chord-sub">${r.chord.de}${i===0?' · Beste Übereinstimmung':''}</div>
+          <div class="chord-notes-row">${notePills}</div>
+        </div>
+        <div class="chord-confidence">
+          <div class="conf-dots">${dots}</div>
+          <div class="conf-pct">${r.confPct}%</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Notes grid
+    const sorted=noteFreqs.sort((a,b)=>b[1]-a[1]);
+    const maxF=sorted[0]?.[1]||1;
+    document.getElementById('notes-grid').innerHTML=sorted.map(([n,f])=>{
+      const dominant=f/maxF>0.35;
+      return`<span class="note-result-chip${dominant?' dominant':''}">${NOTES[n]}</span>`;
+    }).join('');
+
+    // Text summary
+    const progression=chordRows.map(r=>r.chord.rootName+r.chord.suffix).join(' → ');
+    const dominant=sorted.slice(0,3).map(([n])=>NOTES[n]).join(', ');
+    const summary=`🎵 Lied-Entwurf Zusammenfassung\n\nTonart: ${key} ${mode}\n\nAkkord-Verlauf:\n${progression}\n\nHäufigste Töne: ${dominant}\n\nAnzahl erkannter Töne: ${totalNotes}\nAufnahme-Dauer: ${Math.round(duration/1000)} Sekunden\n\n─────────────────────\nErstellt mit Lied→Akkorde App`;
+    document.getElementById('summary-text').textContent=summary;
+    window._summary=summary;
+
+  },900);
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function copySummary(){
+  if(!window._summary)return;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(window._summary).then(()=>{
+      const btn=document.querySelector('.btn-copy');
+      btn.textContent='✓ Kopiert!';
+      setTimeout(()=>btn.textContent='📋 Kopieren',2000);
+    });
+  }
+}
+</script>
+</body>
+</html>
