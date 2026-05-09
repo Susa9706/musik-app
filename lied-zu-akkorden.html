@@ -3,39 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lied → Akkorde</title>
+<title>Lied → Akkorde &amp; Noten</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#FBF7F0;
-  --bg2:#F3EDE2;
-  --card:#FFFFFF;
-  --ink:#1C1409;
-  --ink2:#5C4F3A;
-  --ink3:#9B8E7A;
-  --coral:#C85A3A;
-  --coral-light:#F5E8E3;
-  --coral-mid:#E8A48A;
-  --green:#2D7A4F;
-  --green-light:#E3F2EB;
-  --amber:#B87A10;
-  --amber-light:#FDF3DC;
-  --border:#E5DDD0;
-  --shadow:0 2px 12px rgba(28,20,9,0.08);
-  --font-display:'Lora',serif;
-  --font-body:'Inter',sans-serif;
+  --bg:#FBF7F0;--bg2:#F3EDE2;--card:#FFFFFF;
+  --ink:#1C1409;--ink2:#5C4F3A;--ink3:#9B8E7A;
+  --coral:#C85A3A;--coral-light:#F5E8E3;--coral-mid:#E8A48A;
+  --green:#2D7A4F;--green-light:#E3F2EB;
+  --amber:#B87A10;--amber-light:#FDF3DC;
+  --blue:#3A6BA8;--blue-light:#E3EDF7;
+  --border:#E5DDD0;--shadow:0 2px 12px rgba(28,20,9,0.08);
+  --font-display:'Lora',serif;--font-body:'Inter',sans-serif;
 }
 html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
 body{display:flex;flex-direction:column;min-height:100vh;padding:0;overflow-x:hidden;}
-
-/* SCREENS */
 .screen{display:none;flex-direction:column;align-items:center;min-height:100vh;padding:2rem 1.25rem 3rem;}
 .screen.active{display:flex;}
-
-/* ── SCREEN 1: HOME ── */
 .home-top{text-align:center;margin-bottom:2.5rem;padding-top:1.5rem;}
-.home-top h1{font-family:var(--font-display);font-size:2rem;color:var(--ink);line-height:1.2;margin-bottom:0.5rem;}
+.home-top h1{font-family:var(--font-display);font-size:1.9rem;color:var(--ink);line-height:1.2;margin-bottom:0.5rem;}
 .home-top p{font-size:0.9rem;color:var(--ink2);line-height:1.6;}
 .steps-list{width:100%;max-width:420px;margin-bottom:2.5rem;}
 .step{display:flex;align-items:flex-start;gap:1rem;padding:0.9rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:0.6rem;box-shadow:var(--shadow);}
@@ -43,12 +32,10 @@ body{display:flex;flex-direction:column;min-height:100vh;padding:0;overflow-x:hi
 .step-text strong{display:block;font-size:0.9rem;font-weight:600;color:var(--ink);margin-bottom:2px;}
 .step-text span{font-size:0.78rem;color:var(--ink3);}
 .record-btn{width:160px;height:160px;border-radius:50%;border:none;background:var(--coral);color:#fff;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.4rem;box-shadow:0 8px 32px rgba(200,90,58,0.35);transition:transform 0.15s,box-shadow 0.15s;-webkit-tap-highlight-color:transparent;}
-.record-btn:active{transform:scale(0.95);box-shadow:0 4px 16px rgba(200,90,58,0.3);}
+.record-btn:active{transform:scale(0.95);}
 .record-btn svg{width:48px;height:48px;}
 .record-btn span{font-size:0.85rem;letter-spacing:0.04em;}
 .tip-note{margin-top:2rem;font-size:0.75rem;color:var(--ink3);text-align:center;max-width:280px;line-height:1.6;}
-
-/* ── SCREEN 2: RECORDING ── */
 .rec-header{text-align:center;padding-top:2rem;margin-bottom:1.5rem;}
 .rec-header h2{font-family:var(--font-display);font-size:1.6rem;color:var(--ink);margin-bottom:0.35rem;}
 .rec-header p{font-size:0.85rem;color:var(--ink2);}
@@ -60,7 +47,7 @@ body{display:flex;flex-direction:column;min-height:100vh;padding:0;overflow-x:hi
 canvas#wave{width:100%;max-width:420px;height:80px;border-radius:12px;background:var(--bg2);display:block;margin-bottom:1.5rem;}
 .note-live{text-align:center;margin-bottom:2rem;}
 .note-live-label{font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:0.4rem;}
-.note-live-name{font-family:var(--font-display);font-size:4rem;color:var(--coral);line-height:1;min-height:4.5rem;transition:all 0.1s;}
+.note-live-name{font-family:var(--font-display);font-size:4rem;color:var(--coral);line-height:1;min-height:4.5rem;}
 .note-live-freq{font-size:0.75rem;color:var(--ink3);margin-top:0.25rem;}
 .collected-notes{width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:2rem;box-shadow:var(--shadow);}
 .collected-label{font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:0.5rem;}
@@ -70,14 +57,11 @@ canvas#wave{width:100%;max-width:420px;height:80px;border-radius:12px;background
 .stop-btn{width:80px;height:80px;border-radius:50%;border:3px solid var(--coral);background:#fff;color:var(--coral);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);-webkit-tap-highlight-color:transparent;transition:transform 0.15s;}
 .stop-btn:active{transform:scale(0.93);}
 .stop-btn svg{width:28px;height:28px;}
-
-/* ── SCREEN 3: RESULTS ── */
 .results-header{text-align:center;padding-top:1.5rem;margin-bottom:1.5rem;width:100%;max-width:440px;}
 .results-header h2{font-family:var(--font-display);font-size:1.7rem;color:var(--ink);margin-bottom:0.35rem;}
 .results-header p{font-size:0.82rem;color:var(--ink2);line-height:1.5;}
 .result-section{width:100%;max-width:440px;margin-bottom:1.25rem;}
 .section-title{font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:0.75rem;padding-left:2px;}
-/* CHORD PROGRESSION */
 .chord-timeline{display:flex;flex-direction:column;gap:0.6rem;}
 .chord-row{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;box-shadow:var(--shadow);display:flex;align-items:center;gap:1rem;}
 .chord-row.top-chord{border-color:var(--coral);background:var(--coral-light);}
@@ -95,62 +79,68 @@ canvas#wave{width:100%;max-width:420px;height:80px;border-radius:12px;background
 .conf-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
 .conf-dot.on{background:var(--coral);}
 .conf-pct{font-size:0.65rem;color:var(--ink3);}
-/* ALL NOTES */
 .notes-grid{display:flex;flex-wrap:wrap;gap:6px;}
 .note-result-chip{padding:6px 14px;border-radius:20px;font-size:0.8rem;font-weight:500;border:1px solid var(--border);background:var(--card);color:var(--ink2);}
 .note-result-chip.dominant{background:var(--amber-light);color:var(--amber);border-color:#E0C060;font-weight:600;}
-/* KEY SUGGESTION */
 .key-card{background:var(--green-light);border:1px solid #A8D8BA;border-radius:14px;padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem;}
 .key-icon{width:44px;height:44px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .key-icon svg{width:22px;height:22px;stroke:#fff;}
 .key-text strong{display:block;font-size:1rem;font-weight:600;color:var(--green);}
 .key-text span{font-size:0.78rem;color:#3A6B50;}
-/* ACTION BUTTONS */
 .action-row{display:flex;gap:0.75rem;width:100%;max-width:440px;margin-top:0.5rem;}
-.btn-new{flex:1;padding:0.9rem;border-radius:12px;border:2px solid var(--coral);background:var(--coral);color:#fff;font-family:var(--font-body);font-size:0.9rem;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity 0.15s;}
+.btn-new{flex:1;padding:0.9rem;border-radius:12px;border:2px solid var(--coral);background:var(--coral);color:#fff;font-family:var(--font-body);font-size:0.9rem;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;}
 .btn-new:active{opacity:0.85;}
-.btn-copy{flex:1;padding:0.9rem;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--ink);font-family:var(--font-body);font-size:0.9rem;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+.btn-copy{flex:1;padding:0.9rem;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--ink);font-family:var(--font-body);font-size:0.9rem;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;}
 .btn-copy:active{background:var(--bg2);}
-
-/* ANALYZING OVERLAY */
 .analyzing{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center;gap:1rem;}
 .analyzing.active{display:flex;}
 .spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--coral);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .analyzing p{font-size:0.9rem;color:var(--ink2);}
-
-/* ERROR */
 .error-box{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:1rem 1.2rem;color:#991B1B;font-size:0.82rem;text-align:center;max-width:380px;line-height:1.6;}
+
+.sheet-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 0.5rem;box-shadow:var(--shadow);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.sheet-card .scroll-hint{font-size:0.7rem;color:var(--ink3);text-align:center;margin-bottom:0.5rem;padding:0 0.5rem;}
+#sheet-container{display:block;margin:0 auto;min-width:600px;}
+.sheet-legend{display:flex;gap:1rem;justify-content:center;margin-top:0.7rem;font-size:0.68rem;color:var(--ink3);flex-wrap:wrap;padding:0 0.5rem;}
+.sheet-legend span{display:flex;align-items:center;gap:4px;}
+.sheet-legend .dot{width:8px;height:8px;border-radius:50%;}
+
+.pdf-buttons{display:flex;flex-direction:column;gap:0.6rem;width:100%;}
+.btn-pdf{padding:1rem 1.1rem;border-radius:12px;border:2px solid var(--blue);background:var(--blue-light);color:var(--blue);font-family:var(--font-body);font-size:0.9rem;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;gap:0.75rem;text-align:left;}
+.btn-pdf:active{opacity:0.8;}
+.btn-pdf:disabled{opacity:0.5;cursor:wait;}
+.btn-pdf .pdf-icon{font-size:1.4rem;flex-shrink:0;}
+.btn-pdf .pdf-text{flex:1;}
+.btn-pdf .pdf-text strong{display:block;font-size:0.9rem;}
+.btn-pdf .pdf-text span{display:block;font-size:0.72rem;font-weight:400;opacity:0.8;margin-top:2px;}
+
+#pdf-stage{position:fixed;left:-10000px;top:0;width:1100px;background:#fff;padding:30px;font-family:'Lora',serif;color:#1C1409;}
+#pdf-stage h1{font-size:24pt;margin-bottom:6pt;}
+#pdf-stage h2{font-size:14pt;color:#5C4F3A;margin-bottom:18pt;}
+#pdf-stage h3{font-size:12pt;text-transform:uppercase;letter-spacing:0.1em;color:#9B8E7A;margin:18pt 0 8pt;border-bottom:1px solid #E5DDD0;padding-bottom:4pt;}
+#pdf-stage p,#pdf-stage div{font-family:'Inter',sans-serif;font-size:10pt;line-height:1.5;}
+#pdf-stage .pdf-key{font-size:14pt;color:#2D7A4F;font-weight:600;margin-bottom:2pt;font-family:'Lora',serif;}
+#pdf-stage .pdf-progression{font-family:'Lora',serif;font-size:14pt;background:#F5E8E3;padding:12pt;border-radius:6pt;text-align:center;letter-spacing:0.05em;}
+#pdf-stage .pdf-chord-list{display:flex;flex-wrap:wrap;gap:6pt;margin-top:8pt;}
+#pdf-stage .pdf-chord-item{padding:6pt 10pt;background:#FBF7F0;border:1px solid #E5DDD0;border-radius:6pt;font-size:9pt;}
+#pdf-stage .pdf-chord-item strong{font-family:'Lora',serif;font-size:12pt;color:#C85A3A;display:block;}
+#pdf-stage .pdf-footer{margin-top:24pt;padding-top:8pt;border-top:1px solid #E5DDD0;font-size:8pt;color:#9B8E7A;text-align:center;}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════ SCREEN 1: HOME ═══════════════════ -->
 <div class="screen active" id="screen-home">
   <div class="home-top">
-    <h1>🎵 Lied zu Akkorden</h1>
-    <p>Sing oder summ dein Lied — die App erkennt<br>automatisch die passenden Akkorde.</p>
+    <h1>🎵 Lied zu Akkorden &amp; Noten</h1>
+    <p>Sing oder summ dein Lied — die App erkennt<br>Akkorde, Klaviernoten und macht ein PDF daraus.</p>
   </div>
-
   <div class="steps-list">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-text"><strong>Aufnahme starten</strong><span>Tippe auf den roten Knopf unten</span></div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-text"><strong>Dein Lied singen</strong><span>Sing die Melodie von Anfang bis Ende — so laut und langsam du möchtest</span></div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-text"><strong>Aufnahme stoppen</strong><span>Tippe auf Stopp — die App analysiert automatisch</span></div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-text"><strong>Ergebnis ansehen</strong><span>Akkorde und Noten erscheinen sofort auf dem Bildschirm</span></div>
-    </div>
+    <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Aufnahme starten</strong><span>Tippe auf den roten Knopf unten</span></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Dein Lied singen</strong><span>Sing die Melodie von Anfang bis Ende</span></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Aufnahme stoppen</strong><span>Die App analysiert automatisch</span></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text"><strong>PDF herunterladen</strong><span>Klaviernoten oder Komplettpaket — direkt aufs Handy</span></div></div>
   </div>
-
   <button class="record-btn" onclick="startRecording()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
       <rect x="9" y="2" width="6" height="13" rx="3" fill="white" stroke="white"/>
@@ -158,130 +148,98 @@ canvas#wave{width:100%;max-width:420px;height:80px;border-radius:12px;background
     </svg>
     <span>Aufnahme starten</span>
   </button>
-
-  <p class="tip-note">💡 Tipp: Du brauchst keine Musikkennnisse. Einfach singen oder summen — auch falsch singen ist okay!</p>
-
+  <p class="tip-note">💡 Du brauchst keine Musikkennnisse. Einfach singen oder summen — auch falsch singen ist okay!</p>
   <div id="home-error" style="margin-top:1.5rem;"></div>
 </div>
 
-<!-- ═══════════════════ SCREEN 2: RECORDING ═══════════════════ -->
 <div class="screen" id="screen-rec">
-  <div class="rec-header">
-    <h2>Singe dein Lied</h2>
-    <p>Sing von Anfang bis Ende — dann drücke Stopp</p>
-  </div>
-
-  <div class="recording-indicator">
-    <div class="rec-dot"></div>
-    <span class="rec-label">Aufnahme läuft</span>
-    <span class="rec-time" id="rec-time">0:00</span>
-  </div>
-
+  <div class="rec-header"><h2>Singe dein Lied</h2><p>Sing von Anfang bis Ende — dann drücke Stopp</p></div>
+  <div class="recording-indicator"><div class="rec-dot"></div><span class="rec-label">Aufnahme läuft</span><span class="rec-time" id="rec-time">0:00</span></div>
   <canvas id="wave"></canvas>
-
-  <div class="note-live">
-    <div class="note-live-label">Aktuell erkannter Ton</div>
-    <div class="note-live-name" id="live-note">—</div>
-    <div class="note-live-freq" id="live-freq"></div>
-  </div>
-
-  <div class="collected-notes">
-    <div class="collected-label">Aufgezeichnete Töne</div>
-    <div class="notes-flow" id="notes-flow">
-      <span style="font-size:0.75rem;color:var(--ink3);">Sing etwas...</span>
-    </div>
-  </div>
-
-  <button class="stop-btn" onclick="stopRecording()" title="Stopp">
-    <svg viewBox="0 0 24 24" fill="var(--coral)">
-      <rect x="5" y="5" width="14" height="14" rx="2"/>
-    </svg>
-  </button>
+  <div class="note-live"><div class="note-live-label">Aktuell erkannter Ton</div><div class="note-live-name" id="live-note">—</div><div class="note-live-freq" id="live-freq"></div></div>
+  <div class="collected-notes"><div class="collected-label">Aufgezeichnete Töne</div><div class="notes-flow" id="notes-flow"><span style="font-size:0.75rem;color:var(--ink3);">Sing etwas...</span></div></div>
+  <button class="stop-btn" onclick="stopRecording()" title="Stopp"><svg viewBox="0 0 24 24" fill="var(--coral)"><rect x="5" y="5" width="14" height="14" rx="2"/></svg></button>
   <div style="font-size:0.72rem;color:var(--ink3);margin-top:0.6rem;">Tippe zum Stoppen</div>
 </div>
 
-<!-- ═══════════════════ SCREEN 3: RESULTS ═══════════════════ -->
 <div class="screen" id="screen-results">
-  <div class="results-header">
-    <h2>🎼 Dein Lied-Entwurf</h2>
-    <p id="results-subtitle">Hier sind die erkannten Akkorde und Noten.</p>
-  </div>
-
-  <div class="analyzing" id="analyzing">
-    <div class="spinner"></div>
-    <p>Analysiere deine Melodie...</p>
-  </div>
-
+  <div class="results-header"><h2>🎼 Dein Lied-Entwurf</h2><p id="results-subtitle">Hier sind die erkannten Akkorde, Noten und das Klavierblatt.</p></div>
+  <div class="analyzing" id="analyzing"><div class="spinner"></div><p id="analyzing-text">Analysiere deine Melodie...</p></div>
   <div id="results-content" style="width:100%;max-width:440px;display:none;">
 
-    <!-- KEY -->
+    <div class="result-section">
+      <div class="section-title">📥 PDF herunterladen</div>
+      <div class="pdf-buttons">
+        <button class="btn-pdf" id="btn-pdf-sheet" onclick="downloadPDF('sheet')">
+          <span class="pdf-icon">🎼</span>
+          <span class="pdf-text"><strong>Klaviernoten als PDF</strong><span>Nur die Notenblätter — sauber zum Ausdrucken</span></span>
+        </button>
+        <button class="btn-pdf" id="btn-pdf-full" onclick="downloadPDF('full')">
+          <span class="pdf-icon">📦</span>
+          <span class="pdf-text"><strong>Komplettpaket als PDF</strong><span>Tonart, Akkorde, Noten und Zusammenfassung</span></span>
+        </button>
+      </div>
+    </div>
+
     <div class="result-section">
       <div class="section-title">Wahrscheinliche Tonart</div>
       <div class="key-card" id="key-card">
-        <div class="key-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-        </div>
-        <div class="key-text">
-          <strong id="key-name">—</strong>
-          <span id="key-desc">—</span>
+        <div class="key-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+        <div class="key-text"><strong id="key-name">—</strong><span id="key-desc">—</span></div>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <div class="section-title">🎹 Klaviernoten (Vorschau)</div>
+      <div class="sheet-card">
+        <div class="scroll-hint">↔ Zum Scrollen wischen — fürs Drucken bitte PDF benutzen</div>
+        <div id="sheet-container"></div>
+        <div class="sheet-legend">
+          <span><div class="dot" style="background:#1C1409;"></div>Rechte Hand (Melodie)</span>
+          <span><div class="dot" style="background:#C85A3A;"></div>Linke Hand (Akkorde)</span>
         </div>
       </div>
     </div>
 
-    <!-- CHORDS -->
     <div class="result-section">
       <div class="section-title">Akkorde — Abschnitt für Abschnitt</div>
       <div class="chord-timeline" id="chord-timeline"></div>
     </div>
 
-    <!-- NOTES -->
     <div class="result-section">
       <div class="section-title">Alle erkannten Töne</div>
       <div class="notes-grid" id="notes-grid"></div>
       <p style="font-size:0.72rem;color:var(--ink3);margin-top:0.6rem;line-height:1.5;">Fettgedruckte Töne kamen am häufigsten vor.</p>
     </div>
 
-    <!-- TEXT SUMMARY -->
-    <div class="result-section">
-      <div class="section-title">Zusammenfassung für deinen Musiker</div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;box-shadow:var(--shadow);">
-        <div id="summary-text" style="font-size:0.82rem;color:var(--ink2);line-height:1.7;white-space:pre-wrap;"></div>
-      </div>
-    </div>
-
     <div class="action-row">
       <button class="btn-new" onclick="newRecording()">Neu singen</button>
-      <button class="btn-copy" onclick="copySummary()">📋 Kopieren</button>
+      <button class="btn-copy" onclick="copySummary()">📋 Text kopieren</button>
     </div>
-
   </div>
 </div>
 
+<div id="pdf-stage"></div>
+
 <script>
-// ─── MUSIC DATA ────────────────────────────────────────────────────────────────
 const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const NOTE_DE=['C','Cis','D','Dis','E','F','Fis','G','Gis','A','Ais','H'];
+const NOTES_VEX=['c','c#','d','d#','e','f','f#','g','g#','a','a#','b'];
 
 const CHORD_TYPES=[
-  {suffix:'',    de:'Dur',         intervals:[0,4,7]},
-  {suffix:'m',   de:'Moll',        intervals:[0,3,7]},
-  {suffix:'7',   de:'Dominantsept',intervals:[0,4,7,10]},
-  {suffix:'maj7',de:'Großes Sept', intervals:[0,4,7,11]},
-  {suffix:'m7',  de:'Moll-Sept',   intervals:[0,3,7,10]},
-  {suffix:'sus2',de:'Sus2',        intervals:[0,2,7]},
-  {suffix:'sus4',de:'Sus4',        intervals:[0,5,7]},
-  {suffix:'dim', de:'Vermindert',  intervals:[0,3,6]},
+  {suffix:'',de:'Dur',intervals:[0,4,7]},
+  {suffix:'m',de:'Moll',intervals:[0,3,7]},
+  {suffix:'7',de:'Dominantsept',intervals:[0,4,7,10]},
+  {suffix:'maj7',de:'Großes Sept',intervals:[0,4,7,11]},
+  {suffix:'m7',de:'Moll-Sept',intervals:[0,3,7,10]},
+  {suffix:'sus2',de:'Sus2',intervals:[0,2,7]},
+  {suffix:'sus4',de:'Sus4',intervals:[0,5,7]},
+  {suffix:'dim',de:'Vermindert',intervals:[0,3,6]},
 ];
 
 const ALL_CHORDS=[];
-for(let r=0;r<12;r++){
-  for(const t of CHORD_TYPES){
-    ALL_CHORDS.push({root:r,rootName:NOTES[r],suffix:t.suffix,de:t.de,
-      notes:t.intervals.map(i=>(r+i)%12)});
-  }
-}
+for(let r=0;r<12;r++)for(const t of CHORD_TYPES)
+  ALL_CHORDS.push({root:r,rootName:NOTES[r],suffix:t.suffix,de:t.de,notes:t.intervals.map(i=>(r+i)%12)});
 
-// Major scale patterns for key detection
 const MAJOR_SCALES=[
   [0,2,4,5,7,9,11],[7,9,11,0,2,4,6],[2,4,6,7,9,11,1],[9,11,1,2,4,6,8],
   [4,6,8,9,11,1,3],[11,1,3,4,6,8,10],[6,8,10,11,1,3,5],[1,3,5,6,8,10,0],
@@ -293,15 +251,14 @@ function detectKey(noteFreqs){
   let bestKey='C',bestScore=0,bestMode='Dur';
   for(let i=0;i<12;i++){
     let majScore=0,minScore=0;
-    for(const[n,f] of noteFreqs){majScore+=(MAJOR_SCALES[i].includes(n)?f:0);}
-    for(const[n,f] of noteFreqs){minScore+=(MINOR_SCALES[i].includes(n)?f:0);}
+    for(const[n,f] of noteFreqs)majScore+=(MAJOR_SCALES[i].includes(n)?f:0);
+    for(const[n,f] of noteFreqs)minScore+=(MINOR_SCALES[i].includes(n)?f:0);
     if(majScore>bestScore){bestScore=majScore;bestKey=NOTES[i];bestMode='Dur';}
     if(minScore>bestScore){bestScore=minScore;bestKey=NOTES[(i+9)%12];bestMode='Moll';}
   }
   return{key:bestKey,mode:bestMode};
 }
 
-// ─── PITCH DETECTION ──────────────────────────────────────────────────────────
 function detectPitch(buf,sr){
   const N=Math.floor(buf.length/2);
   let bestOff=-1,bestC=0,lastC=1,found=false;
@@ -329,15 +286,13 @@ function freqToNoteIdx(freq){
 
 function rms(buf){let s=0;for(let i=0;i<buf.length;i++)s+=buf[i]*buf[i];return Math.sqrt(s/buf.length);}
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
 let audioCtx=null,analyser=null,stream=null,rafId=null;
-let recording=false;
-let recStartTime=0,timerInterval=null;
-let capturedEvents=[]; // [{noteIdx, time}]
+let recording=false,recStartTime=0,timerInterval=null;
+let capturedEvents=[];
 let lastNoteIdx=null,lockFrames=0;
 const LOCK=5;
+let analysisData=null;
 
-// ─── WAVEFORM CANVAS ──────────────────────────────────────────────────────────
 const wCvs=document.getElementById('wave');
 const wCtx=wCvs.getContext('2d');
 function resizeWave(){wCvs.width=wCvs.clientWidth*devicePixelRatio;wCvs.height=wCvs.clientHeight*devicePixelRatio;wCtx.scale(devicePixelRatio,devicePixelRatio);}
@@ -356,7 +311,6 @@ function drawWave(buf){
   wCtx.stroke();
 }
 
-// ─── RECORDING FLOW ───────────────────────────────────────────────────────────
 async function startRecording(){
   const errEl=document.getElementById('home-error');
   errEl.innerHTML='';
@@ -367,12 +321,13 @@ async function startRecording(){
     analyser.fftSize=4096;analyser.smoothingTimeConstant=0.2;
     const src=audioCtx.createMediaStreamSource(stream);
     src.connect(analyser);
-    capturedEvents=[];lastNoteIdx=null;lockFrames=0;
+    capturedEvents=[];lastNoteIdx=null;lockFrames=0;chipCount=0;
     recording=true;recStartTime=Date.now();
     showScreen('screen-rec');
+    document.getElementById('notes-flow').innerHTML='<span style="font-size:0.75rem;color:var(--ink3);">Sing etwas...</span>';
     startTimer();drawLoop();
   }catch(e){
-    errEl.innerHTML='<div class="error-box">Mikrofon-Zugriff nicht möglich.<br>Bitte erlaube den Mikrofon-Zugriff im Browser und versuche es erneut.</div>';
+    errEl.innerHTML='<div class="error-box">Mikrofon-Zugriff nicht möglich.<br>Bitte erlaube den Mikrofon-Zugriff im Browser.</div>';
   }
 }
 
@@ -386,11 +341,8 @@ function stopRecording(){
   analyzeAndShow();
 }
 
-function newRecording(){
-  showScreen('screen-home');
-}
+function newRecording(){showScreen('screen-home');}
 
-// ─── TIMER ────────────────────────────────────────────────────────────────────
 function startTimer(){
   timerInterval=setInterval(()=>{
     const s=Math.floor((Date.now()-recStartTime)/1000);
@@ -399,7 +351,6 @@ function startTimer(){
   },500);
 }
 
-// ─── DRAW LOOP ────────────────────────────────────────────────────────────────
 let chipCount=0;
 function drawLoop(){
   if(!recording)return;
@@ -407,10 +358,8 @@ function drawLoop(){
   const buf=new Float32Array(analyser.fftSize);
   analyser.getFloatTimeDomainData(buf);
   drawWave(buf.slice(0,512));
-
   const vol=rms(buf);
   if(vol<0.008){lockFrames=0;document.getElementById('live-note').textContent='—';document.getElementById('live-freq').textContent='';return;}
-
   const res=detectPitch(buf,audioCtx.sampleRate);
   if(res&&res.corr>0.9){
     const n=freqToNoteIdx(res.freq);
@@ -420,7 +369,7 @@ function drawLoop(){
       if(lockFrames>=LOCK){
         document.getElementById('live-note').textContent=NOTES[n.idx];
         document.getElementById('live-freq').textContent=res.freq.toFixed(1)+' Hz';
-        capturedEvents.push({noteIdx:n.idx,time:Date.now()-recStartTime});
+        capturedEvents.push({noteIdx:n.idx,midi:n.midi,oct:n.oct,time:Date.now()-recStartTime});
         updateChips(n.idx);
       }
     }
@@ -438,7 +387,6 @@ function updateChips(idx){
   setTimeout(()=>chip.classList.remove('new'),600);
 }
 
-// ─── ANALYSIS ────────────────────────────────────────────────────────────────
 function analyzeAndShow(){
   const content=document.getElementById('results-content');
   const analyzing=document.getElementById('analyzing');
@@ -451,31 +399,28 @@ function analyzeAndShow(){
       document.getElementById('results-subtitle').textContent='Zu wenige Töne erkannt. Bitte erneut versuchen.';
       document.getElementById('chord-timeline').innerHTML='<p style="font-size:0.82rem;color:var(--ink3);">Keine Akkorde erkennbar — sing bitte länger und deutlicher.</p>';
       document.getElementById('notes-grid').innerHTML='';
-      document.getElementById('summary-text').textContent='';
+      document.getElementById('sheet-container').innerHTML='';
+      analysisData=null;
       return;
     }
     content.style.display='block';
-    document.getElementById('results-subtitle').textContent='Hier sind die erkannten Akkorde und Noten deines Liedes.';
+    document.getElementById('results-subtitle').textContent='Hier sind die erkannten Akkorde, Noten und das Klavierblatt.';
 
-    // Note frequency map
     const noteCount={};
-    for(const e of capturedEvents){noteCount[e.noteIdx]=(noteCount[e.noteIdx]||0)+1;}
+    for(const e of capturedEvents)noteCount[e.noteIdx]=(noteCount[e.noteIdx]||0)+1;
     const noteFreqs=Object.entries(noteCount).map(([n,f])=>[parseInt(n),f]);
     const totalNotes=capturedEvents.length;
+    const{key,mode}=detectKey(noteFreqs);
 
-    // Key detection
-    const {key,mode}=detectKey(noteFreqs);
     document.getElementById('key-name').textContent=key+' '+mode;
     document.getElementById('key-desc').textContent=
       'Dein Lied klingt wahrscheinlich in der Tonart '+key+' '+mode+
       (mode==='Dur'?' — das klingt hell und fröhlich.':' — das klingt eher gefühlvoll und nachdenklich.');
 
-    // Segment-based chord analysis (divide recording into segments)
     const duration=capturedEvents[capturedEvents.length-1].time;
-    const SEGS=Math.min(6,Math.max(2,Math.round(duration/3000)));
+    const SEGS=Math.min(8,Math.max(2,Math.round(duration/3000)));
     const segLen=duration/SEGS;
     const chordRows=[];
-
     for(let s=0;s<SEGS;s++){
       const t0=s*segLen,t1=(s+1)*segLen;
       const evts=capturedEvents.filter(e=>e.time>=t0&&e.time<t1);
@@ -485,7 +430,6 @@ function analyzeAndShow(){
       const segNotes=new Set(evts.map(e=>e.noteIdx));
       const maxC=Math.max(...Object.values(segNoteCount));
       const normC=Object.fromEntries(Object.entries(segNoteCount).map(([n,c])=>[n,c/maxC]));
-
       const scored=ALL_CHORDS.map(c=>{
         let score=0;
         for(const n of c.notes)score+=normC[n]||0;
@@ -493,34 +437,20 @@ function analyzeAndShow(){
         score-=unmatched*0.3;
         return{...c,score:Math.max(0,score),heard:c.notes.filter(n=>segNotes.has(n))};
       }).sort((a,b)=>b.score-a.score);
-
       const best=scored[0];
       const maxScore=scored[0].score||1;
       const confPct=Math.min(100,Math.round((best.score/maxScore)*100));
       const mm=Math.floor(t0/1000/60),ss=Math.floor((t0/1000)%60);
-      chordRows.push({chord:best,confPct,timeLabel:mm+':'+(ss<10?'0':'')+ss,isFirst:s===0,heard:best.heard,allNotes:best.notes});
+      chordRows.push({chord:best,confPct,timeLabel:mm+':'+(ss<10?'0':'')+ss,heard:best.heard,allNotes:best.notes,segIdx:s});
     }
 
-    // Render chord timeline
     const timeline=document.getElementById('chord-timeline');
     timeline.innerHTML=chordRows.map((r,i)=>{
       const dots=[1,2,3,4,5].map(d=>`<div class="conf-dot${d<=Math.round(r.confPct/20)?' on':''}"></div>`).join('');
       const notePills=r.allNotes.map(n=>`<span class="chord-note-tag${r.heard.includes(n)?' heard':''}">${NOTES[n]}</span>`).join('');
-      return`<div class="chord-row${i===0?' top-chord':''}">
-        <div class="chord-time-badge">${r.timeLabel}</div>
-        <div class="chord-main">
-          <div class="chord-big-name">${r.chord.rootName}${r.chord.suffix}</div>
-          <div class="chord-sub">${r.chord.de}${i===0?' · Beste Übereinstimmung':''}</div>
-          <div class="chord-notes-row">${notePills}</div>
-        </div>
-        <div class="chord-confidence">
-          <div class="conf-dots">${dots}</div>
-          <div class="conf-pct">${r.confPct}%</div>
-        </div>
-      </div>`;
+      return`<div class="chord-row${i===0?' top-chord':''}"><div class="chord-time-badge">${r.timeLabel}</div><div class="chord-main"><div class="chord-big-name">${r.chord.rootName}${r.chord.suffix}</div><div class="chord-sub">${r.chord.de}${i===0?' · Beste Übereinstimmung':''}</div><div class="chord-notes-row">${notePills}</div></div><div class="chord-confidence"><div class="conf-dots">${dots}</div><div class="conf-pct">${r.confPct}%</div></div></div>`;
     }).join('');
 
-    // Notes grid
     const sorted=noteFreqs.sort((a,b)=>b[1]-a[1]);
     const maxF=sorted[0]?.[1]||1;
     document.getElementById('notes-grid').innerHTML=sorted.map(([n,f])=>{
@@ -528,17 +458,289 @@ function analyzeAndShow(){
       return`<span class="note-result-chip${dominant?' dominant':''}">${NOTES[n]}</span>`;
     }).join('');
 
-    // Text summary
+    const melodyGroups=groupConsecutive(capturedEvents);
+    const quantized=quantizeMelody(melodyGroups);
+
+    analysisData={key,mode,chordRows,sorted,totalNotes,duration,quantized,melodyGroups};
+
+    renderSheetMusic('sheet-container',quantized,chordRows,key+' '+mode);
+
     const progression=chordRows.map(r=>r.chord.rootName+r.chord.suffix).join(' → ');
     const dominant=sorted.slice(0,3).map(([n])=>NOTES[n]).join(', ');
-    const summary=`🎵 Lied-Entwurf Zusammenfassung\n\nTonart: ${key} ${mode}\n\nAkkord-Verlauf:\n${progression}\n\nHäufigste Töne: ${dominant}\n\nAnzahl erkannter Töne: ${totalNotes}\nAufnahme-Dauer: ${Math.round(duration/1000)} Sekunden\n\n─────────────────────\nErstellt mit Lied→Akkorde App`;
-    document.getElementById('summary-text').textContent=summary;
-    window._summary=summary;
-
+    window._summary=`🎵 Lied-Entwurf Zusammenfassung\n\nTonart: ${key} ${mode}\n\nAkkord-Verlauf:\n${progression}\n\nHäufigste Töne: ${dominant}\n\nAnzahl erkannter Töne: ${totalNotes}\nAufnahme-Dauer: ${Math.round(duration/1000)} Sekunden\n\n─────────────────────\nErstellt mit Lied→Akkorde App`;
   },900);
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function groupConsecutive(events){
+  if(events.length===0)return[];
+  const groups=[];
+  let current={midi:events[0].midi,start:events[0].time,end:events[0].time,count:1};
+  for(let i=1;i<events.length;i++){
+    const e=events[i];
+    if(e.midi===current.midi&&e.time-current.end<400){
+      current.end=e.time;current.count++;
+    }else{
+      groups.push({...current,duration:Math.max(150,current.end-current.start+100)});
+      current={midi:e.midi,start:e.time,end:e.time,count:1};
+    }
+  }
+  groups.push({...current,duration:Math.max(150,current.end-current.start+100)});
+  return groups;
+}
+
+function quantizeMelody(groups){
+  if(groups.length===0)return[];
+  const sortedDurs=groups.map(g=>g.duration).sort((a,b)=>a-b);
+  const median=sortedDurs[Math.floor(sortedDurs.length/2)]||500;
+  return groups.map(g=>{
+    const ratio=g.duration/median;
+    let dur='q';
+    if(ratio<0.55)dur='8';
+    else if(ratio<1.4)dur='q';
+    else if(ratio<2.4)dur='h';
+    else dur='w';
+    return{midi:g.midi,duration:dur};
+  });
+}
+
+function midiToVexKey(midi){
+  const idx=((midi%12)+12)%12;
+  const n=NOTES_VEX[idx];
+  const oct=Math.floor(midi/12)-1;
+  return n+'/'+oct;
+}
+
+const DUR_BEATS={'w':4,'h':2,'q':1,'8':0.5,'16':0.25};
+
+function renderSheetMusic(containerId,melody,chordRows,keyLabel){
+  const container=document.getElementById(containerId);
+  container.innerHTML='';
+  if(!window.Vex||!Vex.Flow){
+    container.innerHTML='<p style="text-align:center;font-size:0.8rem;color:#9B8E7A;padding:1rem;">Notenanzeige konnte nicht geladen werden.</p>';
+    return;
+  }
+  const VF=Vex.Flow;
+
+  const measures=[];
+  let currentMeasure=[];
+  let currentBeats=0;
+  for(const note of melody){
+    const beats=DUR_BEATS[note.duration];
+    if(currentBeats+beats>4){
+      while(currentBeats<4){
+        const remain=4-currentBeats;
+        if(remain>=2){currentMeasure.push({rest:true,duration:'hr'});currentBeats+=2;}
+        else if(remain>=1){currentMeasure.push({rest:true,duration:'qr'});currentBeats+=1;}
+        else{currentMeasure.push({rest:true,duration:'8r'});currentBeats+=0.5;}
+      }
+      measures.push(currentMeasure);
+      currentMeasure=[note];
+      currentBeats=beats;
+    }else{
+      currentMeasure.push(note);
+      currentBeats+=beats;
+    }
+  }
+  if(currentMeasure.length>0){
+    while(currentBeats<4){
+      const remain=4-currentBeats;
+      if(remain>=2){currentMeasure.push({rest:true,duration:'hr'});currentBeats+=2;}
+      else if(remain>=1){currentMeasure.push({rest:true,duration:'qr'});currentBeats+=1;}
+      else{currentMeasure.push({rest:true,duration:'8r'});currentBeats+=0.5;}
+    }
+    measures.push(currentMeasure);
+  }
+
+  const MAX_MEASURES=Math.min(measures.length,8);
+  const usedMeasures=measures.slice(0,MAX_MEASURES);
+  const NUM=usedMeasures.length;
+  if(NUM===0){
+    container.innerHTML='<p style="text-align:center;font-size:0.8rem;color:#9B8E7A;padding:1rem;">Zu wenige Noten für ein Notenblatt.</p>';
+    return;
+  }
+
+  const chordPerMeasure=[];
+  for(let m=0;m<NUM;m++){
+    const ratio=NUM>1?m/(NUM-1):0;
+    const idx=Math.min(chordRows.length-1,Math.max(0,Math.floor(ratio*chordRows.length)));
+    chordPerMeasure.push(chordRows[idx]?chordRows[idx].chord:null);
+  }
+
+  const measureWidth=200;
+  const startX=20;
+  const totalWidth=startX+60+NUM*measureWidth+20;
+  const height=240;
+
+  const div=document.createElement('div');
+  container.appendChild(div);
+  const renderer=new VF.Renderer(div,VF.Renderer.Backends.SVG);
+  renderer.resize(totalWidth,height);
+  const ctx=renderer.getContext();
+
+  for(let m=0;m<NUM;m++){
+    const x=startX+(m===0?0:60)+m*measureWidth;
+    const w=measureWidth+(m===0?60:0);
+
+    const treble=new VF.Stave(x,30,w);
+    if(m===0)treble.addClef('treble').addTimeSignature('4/4');
+    treble.setContext(ctx).draw();
+
+    const bass=new VF.Stave(x,130,w);
+    if(m===0)bass.addClef('bass').addTimeSignature('4/4');
+    bass.setContext(ctx).draw();
+
+    if(m===0){
+      new VF.StaveConnector(treble,bass).setType(VF.StaveConnector.type.BRACE).setContext(ctx).draw();
+      new VF.StaveConnector(treble,bass).setType(VF.StaveConnector.type.SINGLE_LEFT).setContext(ctx).draw();
+    }
+
+    const trebleNotes=[];
+    for(const n of usedMeasures[m]){
+      try{
+        if(n.rest){
+          const r=new VF.StaveNote({clef:'treble',keys:['b/4'],duration:n.duration});
+          trebleNotes.push(r);
+        }else{
+          let midi=n.midi;
+          while(midi<60)midi+=12;
+          while(midi>84)midi-=12;
+          const key=midiToVexKey(midi);
+          const note=new VF.StaveNote({clef:'treble',keys:[key],duration:n.duration});
+          if(key.includes('#'))note.addModifier(new VF.Accidental('#'),0);
+          trebleNotes.push(note);
+        }
+      }catch(err){console.error('treble',err);}
+    }
+
+    if(trebleNotes.length>0){
+      try{
+        const voice=new VF.Voice({num_beats:4,beat_value:4}).setStrict(false);
+        voice.addTickables(trebleNotes);
+        new VF.Formatter().joinVoices([voice]).format([voice],w-30);
+        voice.draw(ctx,treble);
+      }catch(err){console.error('treble draw',err);}
+    }
+
+    const chord=chordPerMeasure[m];
+    if(chord){
+      try{
+        const baseOct=3;
+        const sortedChordNotes=[...chord.notes].sort((a,b)=>a-b);
+        let prevPitch=-1;
+        const keys=sortedChordNotes.map(n=>{
+          let oct=baseOct;
+          let pitch=n+oct*12;
+          while(pitch<=prevPitch)pitch+=12;
+          oct=Math.floor(pitch/12);
+          prevPitch=pitch;
+          return NOTES_VEX[n]+'/'+oct;
+        });
+        const bassChord=new VF.StaveNote({clef:'bass',keys,duration:'w'});
+        sortedChordNotes.forEach((n,i)=>{
+          if(NOTES[n].includes('#'))bassChord.addModifier(new VF.Accidental('#'),i);
+        });
+        bassChord.setStyle({fillStyle:'#C85A3A',strokeStyle:'#C85A3A'});
+
+        const voiceB=new VF.Voice({num_beats:4,beat_value:4}).setStrict(false);
+        voiceB.addTickables([bassChord]);
+        new VF.Formatter().joinVoices([voiceB]).format([voiceB],w-30);
+        voiceB.draw(ctx,bass);
+
+        ctx.save();
+        ctx.setFillStyle('#C85A3A');
+        ctx.setFont('Lora',14,'bold');
+        ctx.fillText(chord.rootName+chord.suffix,x+(m===0?70:15),120);
+        ctx.restore();
+      }catch(err){console.error('bass',err);}
+    }
+  }
+
+  ctx.save();
+  ctx.setFillStyle('#5C4F3A');
+  ctx.setFont('Inter',10);
+  ctx.fillText('Tonart: '+keyLabel,startX,20);
+  ctx.restore();
+}
+
+async function downloadPDF(type){
+  if(!analysisData){
+    alert('Bitte zuerst ein Lied aufnehmen.');
+    return;
+  }
+  const btnSheet=document.getElementById('btn-pdf-sheet');
+  const btnFull=document.getElementById('btn-pdf-full');
+  btnSheet.disabled=true;btnFull.disabled=true;
+  const origText=type==='sheet'?btnSheet.querySelector('strong').textContent:btnFull.querySelector('strong').textContent;
+  const targetBtn=type==='sheet'?btnSheet:btnFull;
+  targetBtn.querySelector('strong').textContent='PDF wird erstellt...';
+
+  try{
+    const stage=document.getElementById('pdf-stage');
+    const date=new Date().toLocaleDateString('de-DE');
+
+    if(type==='sheet'){
+      stage.innerHTML=`
+        <h1 style="text-align:center;">🎼 Klaviernoten</h1>
+        <h2 style="text-align:center;">Tonart: ${analysisData.key} ${analysisData.mode}</h2>
+        <div id="pdf-sheet-target" style="margin-top:20pt;"></div>
+        <div class="pdf-footer">Erstellt am ${date} mit Lied→Akkorde App</div>
+      `;
+      renderSheetMusic('pdf-sheet-target',analysisData.quantized,analysisData.chordRows,analysisData.key+' '+analysisData.mode);
+    }else{
+      const progression=analysisData.chordRows.map(r=>r.chord.rootName+r.chord.suffix).join('  →  ');
+      const dominant=analysisData.sorted.slice(0,5).map(([n])=>NOTES[n]).join(', ');
+      const chordItems=analysisData.chordRows.map(r=>
+        `<div class="pdf-chord-item"><strong>${r.chord.rootName}${r.chord.suffix}</strong>${r.chord.de} · Zeit ${r.timeLabel} · ${r.confPct}%</div>`
+      ).join('');
+
+      stage.innerHTML=`
+        <h1 style="text-align:center;">🎵 Lied-Entwurf</h1>
+        <h2 style="text-align:center;">Komplettpaket — Tonart, Noten und Akkorde</h2>
+
+        <h3>Tonart</h3>
+        <div class="pdf-key">${analysisData.key} ${analysisData.mode}</div>
+        <div style="color:#5C4F3A;">${analysisData.mode==='Dur'?'Hell und fröhlich klingend.':'Gefühlvoll und nachdenklich klingend.'}</div>
+
+        <h3>Akkord-Verlauf</h3>
+        <div class="pdf-progression">${progression}</div>
+
+        <h3>Akkorde im Detail</h3>
+        <div class="pdf-chord-list">${chordItems}</div>
+
+        <h3>Klaviernoten</h3>
+        <div id="pdf-sheet-target"></div>
+
+        <h3>Erkannte Töne</h3>
+        <div style="color:#5C4F3A;line-height:1.8;">Häufigste Töne: <strong>${dominant}</strong><br>Anzahl erkannter Töne: ${analysisData.totalNotes}<br>Aufnahme-Dauer: ${Math.round(analysisData.duration/1000)} Sekunden</div>
+
+        <div class="pdf-footer">Erstellt am ${date} mit Lied→Akkorde App</div>
+      `;
+      renderSheetMusic('pdf-sheet-target',analysisData.quantized,analysisData.chordRows,analysisData.key+' '+analysisData.mode);
+    }
+
+    await new Promise(r=>setTimeout(r,800));
+
+    const fileName=type==='sheet'?`Klaviernoten_${analysisData.key}_${analysisData.mode}.pdf`:`Lied-Entwurf_${analysisData.key}_${analysisData.mode}.pdf`;
+
+    const opt={
+      margin:[10,10,10,10],
+      filename:fileName,
+      image:{type:'jpeg',quality:0.98},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+      jsPDF:{unit:'mm',format:'a4',orientation:'landscape'}
+    };
+
+    await html2pdf().set(opt).from(stage).save();
+    stage.innerHTML='';
+  }catch(err){
+    alert('PDF-Erstellung fehlgeschlagen: '+err.message);
+    console.error(err);
+  }finally{
+    btnSheet.disabled=false;btnFull.disabled=false;
+    targetBtn.querySelector('strong').textContent=origText;
+  }
+}
+
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -550,7 +752,7 @@ function copySummary(){
     navigator.clipboard.writeText(window._summary).then(()=>{
       const btn=document.querySelector('.btn-copy');
       btn.textContent='✓ Kopiert!';
-      setTimeout(()=>btn.textContent='📋 Kopieren',2000);
+      setTimeout(()=>btn.textContent='📋 Text kopieren',2000);
     });
   }
 }
