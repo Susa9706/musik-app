@@ -698,77 +698,157 @@ async function downloadPDF(type){
   targetBtn.querySelector('strong').textContent='PDF wird erstellt...';
 
   try{
+    // Render sheet music in hidden stage to get SVG
     const stage=document.getElementById('pdf-stage');
+    stage.innerHTML='<div id="pdf-sheet-target"></div>';
+    renderSheetMusic('pdf-sheet-target',analysisData.quantized,analysisData.chordRows,analysisData.key+' '+analysisData.mode);
+    await new Promise(r=>setTimeout(r,400));
+    const svgEl=stage.querySelector('svg');
+    if(!svgEl)throw new Error('Notenanzeige konnte nicht erstellt werden');
+    const sheetImage=await svgToPngDataUrl(svgEl);
+    stage.innerHTML='';
+
+    // Get jsPDF (bundled with html2pdf)
+    const jsPDFCtor=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+    if(!jsPDFCtor)throw new Error('PDF-Bibliothek nicht geladen');
+    const pdf=new jsPDFCtor({orientation:'landscape',unit:'mm',format:'a4'});
+    const pageW=pdf.internal.pageSize.getWidth();
+    const pageH=pdf.internal.pageSize.getHeight();
     const date=new Date().toLocaleDateString('de-DE');
 
     if(type==='sheet'){
-      stage.innerHTML=`
-        <h1 style="text-align:center;">🎼 Klaviernoten</h1>
-        <h2 style="text-align:center;">Tonart: ${analysisData.key} ${analysisData.mode}</h2>
-        <div id="pdf-sheet-target" style="margin-top:20pt;"></div>
-        <div class="pdf-footer">Erstellt am ${date} mit Lied→Akkorde App</div>
-      `;
-      renderSheetMusic('pdf-sheet-target',analysisData.quantized,analysisData.chordRows,analysisData.key+' '+analysisData.mode);
+      // Title
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(22);
+      pdf.setTextColor(28,20,9);
+      pdf.text('Klaviernoten',pageW/2,18,{align:'center'});
+      pdf.setFont('helvetica','normal');
+      pdf.setFontSize(12);
+      pdf.setTextColor(92,79,58);
+      pdf.text('Tonart: '+analysisData.key+' '+analysisData.mode,pageW/2,26,{align:'center'});
+
+      // Sheet music image
+      const imgProps=pdf.getImageProperties(sheetImage);
+      const imgW=pageW-20;
+      const imgH=(imgProps.height*imgW)/imgProps.width;
+      pdf.addImage(sheetImage,'PNG',10,35,imgW,Math.min(imgH,pageH-55));
+
+      // Footer
+      pdf.setFontSize(8);
+      pdf.setTextColor(155,142,122);
+      pdf.text('Erstellt am '+date+' mit Lied-Akkorde App',pageW/2,pageH-8,{align:'center'});
     }else{
-      const progression=analysisData.chordRows.map(r=>r.chord.rootName+r.chord.suffix).join('  →  ');
-      const dominant=analysisData.sorted.slice(0,5).map(([n])=>NOTES[n]).join(', ');
-      const chordItems=analysisData.chordRows.map(r=>
-        `<div class="pdf-chord-item"><strong>${r.chord.rootName}${r.chord.suffix}</strong>${r.chord.de} · Zeit ${r.timeLabel} · ${r.confPct}%</div>`
-      ).join('');
+      // FULL PACKAGE
+      let y=18;
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(22);
+      pdf.setTextColor(28,20,9);
+      pdf.text('Lied-Entwurf',pageW/2,y,{align:'center'});
+      y+=7;
+      pdf.setFont('helvetica','normal');
+      pdf.setFontSize(11);
+      pdf.setTextColor(92,79,58);
+      pdf.text('Komplettpaket: Tonart, Noten und Akkorde',pageW/2,y,{align:'center'});
+      y+=12;
 
-      stage.innerHTML=`
-        <h1 style="text-align:center;">🎵 Lied-Entwurf</h1>
-        <h2 style="text-align:center;">Komplettpaket — Tonart, Noten und Akkorde</h2>
+      // TONART
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(9);
+      pdf.setTextColor(155,142,122);
+      pdf.text('TONART',15,y);
+      y+=5;
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(14);
+      pdf.setTextColor(45,122,79);
+      pdf.text(analysisData.key+' '+analysisData.mode,15,y);
+      y+=5;
+      pdf.setFont('helvetica','normal');
+      pdf.setFontSize(10);
+      pdf.setTextColor(92,79,58);
+      const desc=analysisData.mode==='Dur'?'Hell und froehlich klingend.':'Gefuehlvoll und nachdenklich klingend.';
+      pdf.text(desc,15,y);
+      y+=8;
 
-        <h3>Tonart</h3>
-        <div class="pdf-key">${analysisData.key} ${analysisData.mode}</div>
-        <div style="color:#5C4F3A;">${analysisData.mode==='Dur'?'Hell und fröhlich klingend.':'Gefühlvoll und nachdenklich klingend.'}</div>
+      // AKKORD-VERLAUF
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(9);
+      pdf.setTextColor(155,142,122);
+      pdf.text('AKKORD-VERLAUF',15,y);
+      y+=4;
+      pdf.setFillColor(245,232,227);
+      pdf.rect(15,y,pageW-30,11,'F');
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(13);
+      pdf.setTextColor(28,20,9);
+      const progression=analysisData.chordRows.map(r=>r.chord.rootName+r.chord.suffix).join('  >  ');
+      pdf.text(progression,pageW/2,y+7,{align:'center'});
+      y+=15;
 
-        <h3>Akkord-Verlauf</h3>
-        <div class="pdf-progression">${progression}</div>
-
-        <h3>Akkorde im Detail</h3>
-        <div class="pdf-chord-list">${chordItems}</div>
-
-        <h3>Klaviernoten</h3>
-        <div id="pdf-sheet-target"></div>
-
-        <h3>Erkannte Töne</h3>
-        <div style="color:#5C4F3A;line-height:1.8;">Häufigste Töne: <strong>${dominant}</strong><br>Anzahl erkannter Töne: ${analysisData.totalNotes}<br>Aufnahme-Dauer: ${Math.round(analysisData.duration/1000)} Sekunden</div>
-
-        <div class="pdf-footer">Erstellt am ${date} mit Lied→Akkorde App</div>
-      `;
-      renderSheetMusic('pdf-sheet-target',analysisData.quantized,analysisData.chordRows,analysisData.key+' '+analysisData.mode);
-    }
-
-    await new Promise(r=>setTimeout(r,400));
-
-    // Convert SVG sheet music to PNG image for reliable PDF embedding
-    const sheetTarget=document.getElementById('pdf-sheet-target');
-    if(sheetTarget){
-      const svgEl=sheetTarget.querySelector('svg');
-      if(svgEl){
-        try{
-          const dataUrl=await svgToPngDataUrl(svgEl);
-          sheetTarget.innerHTML=`<img src="${dataUrl}" style="width:100%;max-width:100%;display:block;" />`;
-        }catch(e){console.error('SVG conversion failed',e);}
+      // AKKORDE DETAIL
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(9);
+      pdf.setTextColor(155,142,122);
+      pdf.text('AKKORDE IM DETAIL',15,y);
+      y+=5;
+      pdf.setFont('helvetica','normal');
+      pdf.setFontSize(9);
+      pdf.setTextColor(60,52,40);
+      for(const r of analysisData.chordRows){
+        const line=r.chord.rootName+r.chord.suffix+'  ('+r.chord.de+')   Zeit: '+r.timeLabel+'   Uebereinstimmung: '+r.confPct+'%';
+        pdf.text(line,15,y);
+        y+=4.5;
       }
+      y+=3;
+
+      // KLAVIERNOTEN
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(9);
+      pdf.setTextColor(155,142,122);
+      pdf.text('KLAVIERNOTEN',15,y);
+      y+=4;
+
+      const imgProps=pdf.getImageProperties(sheetImage);
+      const imgW=pageW-30;
+      let imgH=(imgProps.height*imgW)/imgProps.width;
+      // If too tall, add new page
+      if(y+imgH>pageH-30){
+        pdf.addPage();
+        y=15;
+      }
+      // Cap image height
+      const maxImgH=pageH-y-30;
+      if(imgH>maxImgH){
+        const scaledW=imgW*(maxImgH/imgH);
+        pdf.addImage(sheetImage,'PNG',(pageW-scaledW)/2,y,scaledW,maxImgH);
+        y+=maxImgH+5;
+      }else{
+        pdf.addImage(sheetImage,'PNG',15,y,imgW,imgH);
+        y+=imgH+5;
+      }
+
+      // ERKANNTE TÖNE
+      if(y>pageH-25){pdf.addPage();y=15;}
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(9);
+      pdf.setTextColor(155,142,122);
+      pdf.text('ERKANNTE TOENE',15,y);
+      y+=5;
+      pdf.setFont('helvetica','normal');
+      pdf.setFontSize(10);
+      pdf.setTextColor(92,79,58);
+      const dominant=analysisData.sorted.slice(0,5).map(([n])=>NOTES[n]).join(', ');
+      pdf.text('Haeufigste Toene: '+dominant,15,y);y+=5;
+      pdf.text('Anzahl erkannter Toene: '+analysisData.totalNotes,15,y);y+=5;
+      pdf.text('Aufnahme-Dauer: '+Math.round(analysisData.duration/1000)+' Sekunden',15,y);
+
+      pdf.setFontSize(8);
+      pdf.setTextColor(155,142,122);
+      pdf.text('Erstellt am '+date+' mit Lied-Akkorde App',pageW/2,pageH-8,{align:'center'});
     }
 
-    await new Promise(r=>setTimeout(r,300));
+    const fileName=type==='sheet'?'Klaviernoten_'+analysisData.key+'_'+analysisData.mode+'.pdf':'Lied-Entwurf_'+analysisData.key+'_'+analysisData.mode+'.pdf';
+    pdf.save(fileName);
 
-    const fileName=type==='sheet'?`Klaviernoten_${analysisData.key}_${analysisData.mode}.pdf`:`Lied-Entwurf_${analysisData.key}_${analysisData.mode}.pdf`;
-
-    const opt={
-      margin:[10,10,10,10],
-      filename:fileName,
-      image:{type:'jpeg',quality:0.98},
-      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
-      jsPDF:{unit:'mm',format:'a4',orientation:'landscape'}
-    };
-
-    await html2pdf().set(opt).from(stage).save();
-    stage.innerHTML='';
   }catch(err){
     alert('PDF-Erstellung fehlgeschlagen: '+err.message);
     console.error(err);
