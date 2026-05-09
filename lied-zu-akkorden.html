@@ -662,6 +662,29 @@ function renderSheetMusic(containerId,melody,chordRows,keyLabel){
   ctx.restore();
 }
 
+function svgToPngDataUrl(svgEl){
+  return new Promise((resolve,reject)=>{
+    try{
+      const svgStr=new XMLSerializer().serializeToString(svgEl);
+      const w=parseInt(svgEl.getAttribute('width'))||1000;
+      const h=parseInt(svgEl.getAttribute('height'))||240;
+      const svg64='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svgStr)));
+      const img=new Image();
+      img.onload=()=>{
+        const canvas=document.createElement('canvas');
+        canvas.width=w*2;canvas.height=h*2;
+        const ctx=canvas.getContext('2d');
+        ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.scale(2,2);
+        ctx.drawImage(img,0,0);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror=(e)=>reject(new Error('SVG-Konvertierung fehlgeschlagen'));
+      img.src=svg64;
+    }catch(e){reject(e);}
+  });
+}
+
 async function downloadPDF(type){
   if(!analysisData){
     alert('Bitte zuerst ein Lied aufnehmen.');
@@ -718,7 +741,21 @@ async function downloadPDF(type){
       renderSheetMusic('pdf-sheet-target',analysisData.quantized,analysisData.chordRows,analysisData.key+' '+analysisData.mode);
     }
 
-    await new Promise(r=>setTimeout(r,800));
+    await new Promise(r=>setTimeout(r,400));
+
+    // Convert SVG sheet music to PNG image for reliable PDF embedding
+    const sheetTarget=document.getElementById('pdf-sheet-target');
+    if(sheetTarget){
+      const svgEl=sheetTarget.querySelector('svg');
+      if(svgEl){
+        try{
+          const dataUrl=await svgToPngDataUrl(svgEl);
+          sheetTarget.innerHTML=`<img src="${dataUrl}" style="width:100%;max-width:100%;display:block;" />`;
+        }catch(e){console.error('SVG conversion failed',e);}
+      }
+    }
+
+    await new Promise(r=>setTimeout(r,300));
 
     const fileName=type==='sheet'?`Klaviernoten_${analysisData.key}_${analysisData.mode}.pdf`:`Lied-Entwurf_${analysisData.key}_${analysisData.mode}.pdf`;
 
